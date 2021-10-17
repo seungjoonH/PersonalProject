@@ -633,11 +633,12 @@ public class TodoUtil {
 	public static void controlJson(TodoList l, ArrayList<String> cmds, String filename) {
 		
 		Scanner sc = new Scanner(System.in);
-		String io = null;
+		String io = null, ovStr;
+		int overwrite = -1;
 		
 		try {
 			io = cmds.get(1);
-			if (!io.equals("load") && !io.equals("save") && !io.equals("list")) {
+			if (!io.equals("load") && !io.equals("save") && !io.equals("list") && !io.equals("imp")) {
 				System.out.println("\n잘못 입력하셨습니다"); return;
 			}
 		}
@@ -657,9 +658,24 @@ public class TodoUtil {
 			toJson(l, filename); 
 			System.out.println(String.format("'%s'에 정상적으로 저장했습니다", filename));
 		}
-		else if (io.equals("list")) {
-			listAllJson(l);
+		else if (io.equals("list"))  listAllJson(l);
+		else if (io.equals("imp")) {
+			try {
+				if (cmds.get(2).equals("1") || cmds.get(2).equals("t") || cmds.get(2).equals("true")) overwrite = 1;
+				else if (cmds.get(2).equals("0") || cmds.get(2).equals("f") || cmds.get(2).equals("false")) overwrite = 0;
+				if (overwrite == -1) { System.out.println("\n잘못 입력하셨습니다"); return; }
+			}
+			catch (IndexOutOfBoundsException e) {
+				Menu.prompt("덮어쓰기(overwrite)"); ovStr = sc.next();
+				if (ovStr.equals("q")) { System.out.println("\n취소하였습니다"); return; } 
+				if (ovStr.equals("1") || ovStr.equals("t") || ovStr.equals("true")) overwrite = 1;
+				else if (ovStr.equals("0") || ovStr.equals("f") || ovStr.equals("false")) overwrite = 0;
+				if (overwrite == -1) { System.out.println("\n잘못 입력하셨습니다"); return; }
+			}
+			
+			importFromJson(l, filename, overwrite == 1 ? true : false);
 		}
+		
 	}
 	
 	public static void toJson(TodoList l, String filename) {
@@ -693,5 +709,27 @@ public class TodoUtil {
 		catch (IOException e) { e.printStackTrace(); }
 		
 		return gson.fromJson(jsonStr, new TypeToken<ArrayList<TodoItem>>(){}.getType());
+	}
+	
+	public static void importFromJson(TodoList l, String filename, boolean overwrite) {
+		Scanner sc = new Scanner(System.in);
+		ArrayList<TodoItem> list = fromJson(filename);
+		ArrayList<String> tempCmds = new ArrayList<String>();
+		
+		tempCmds.add("del");
+		tempCmds.add("*");
+		
+		if (overwrite) {
+			System.out.println("\nJson 파일을 import 하기 전 DB table을 초기화 합니다");
+			deleteItem(l, tempCmds);
+		}
+		else System.out.println("\nDB table을 유지한 채 Json 파일을 import 합니다");
+		
+		for (TodoItem item : list) {
+			if (overwrite) l.addItemAllField(item);
+			else l.addItemAllFieldNoId(item);
+		}
+		
+		System.out.println("\nJson 파일의 모든 데이터를 DB table로 import 하였습니다");
 	}
 }

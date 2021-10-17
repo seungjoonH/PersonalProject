@@ -44,17 +44,17 @@ public class TodoList {
 	}
 	
 	public int addItem(TodoItem t) {
-		String sql = "insert into list (category, title, description, currentDate, dueDate) values (?, ?, ?, ?, ?);";
+		String sql = "insert into list (category, title, description, dueDate, currentDate) values (?, ?, ?, ?, ?);";
 		PreparedStatement pstmt;
 		int count = 0;
 		
 		try {
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, t.getTitle());
-			pstmt.setString(2, t.getDescription());
-			pstmt.setString(3, t.getCategory());
-			pstmt.setString(4, t.getCurrentDate());
-			pstmt.setString(5, t.getDueDate());
+			pstmt.setString(1, t.getCategory());
+			pstmt.setString(2, t.getTitle());
+			pstmt.setString(3, t.getDescription());
+			pstmt.setString(4, t.getDueDate());
+			pstmt.setString(5, t.getCurrentDate());
 			
 			count = pstmt.executeUpdate();
 			pstmt.close();
@@ -64,6 +64,59 @@ public class TodoList {
 		return count;
 	}
 
+	public int addItemAllField(TodoItem t) {
+		String sql = "insert into list ("
+				+ "id, isCompleted, essential, category, title, description, dueDate, state, currentDate) "
+				+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+		PreparedStatement pstmt;
+		int count = 0;
+		
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, t.getId());
+			pstmt.setInt(2, t.getIsCompleted());
+			pstmt.setInt(3, t.getEssential());
+			pstmt.setString(4, t.getCategory());
+			pstmt.setString(5, t.getTitle());
+			pstmt.setString(6, t.getDescription());
+			pstmt.setString(7, t.getDueDate());
+			pstmt.setString(8, t.getState());
+			pstmt.setString(9, t.getCurrentDate());
+			
+			count = pstmt.executeUpdate();
+			pstmt.close();
+			
+		} catch (SQLException e) { e.printStackTrace(); }
+		
+		return count;
+	}
+
+	public int addItemAllFieldNoId(TodoItem t) {
+		String sql = "insert into list ("
+				+ "isCompleted, essential, category, title, description, dueDate, state, currentDate) "
+				+ "values (?, ?, ?, ?, ?, ?, ?, ?);";
+		PreparedStatement pstmt;
+		int count = 0;
+		
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, t.getIsCompleted());
+			pstmt.setInt(2, t.getEssential());
+			pstmt.setString(3, t.getCategory());
+			pstmt.setString(4, t.getTitle());
+			pstmt.setString(5, t.getDescription());
+			pstmt.setString(6, t.getDueDate());
+			pstmt.setString(7, t.getState());
+			pstmt.setString(8, t.getCurrentDate());
+			
+			count = pstmt.executeUpdate();
+			pstmt.close();
+			
+		} catch (SQLException e) { e.printStackTrace(); }
+		
+		return count;
+	}
+	
 	public int deleteItem(int index) {
 		String sql = "delete from list where id=?;";
 		PreparedStatement pstmt;
